@@ -8,7 +8,11 @@ import 'package:http/http.dart' as http;
 
 class ServiceKu {
   // static String baseUrl = "http://172.20.10.2:5000/api/register";
-  static String baseUrl = "http://192.168.1.104:5000/api/register";
+  // static String baseUrl = "http://192.168.1.104:5000/api/register";
+  // static String baseUrl = "https://3000-firebase-cobaapi-1748147920733.cluster-pgviq6mvsncnqxx6kr7pbz65v6.cloudworkstations.dev/api/register";
+  static String baseUrl = "https://3000-firebase-cobaapi-1748147920733.cluster-pgviq6mvsncnqxx6kr7pbz65v6.cloudworkstations.dev/api";
+  // static String baseUrl = "https://3000-firebase-cobaapi-1748147920733.cluster-pgviq6mvsncnqxx6kr7pbz65v6.cloudworkstations.dev/";
+ 
   FirebaseFirestore firestore = FirebaseFirestore.instance;
   final box = GetStorage();
 
@@ -37,10 +41,27 @@ class ServiceKu {
       List<String> base64Image, String username, String npm) async {
     try {
       final res = await http.post(
-        Uri.parse(baseUrl),
+        Uri.parse("$baseUrl/register"),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode(
             {'npm': npm, 'username': username, 'images': base64Image}),
+      );
+      print("response register: ");
+      print(res.body);
+      final json = jsonDecode(res.body);
+      return json['message'];
+    } catch (e) {
+      print("err: $e");
+    }
+  }
+
+  Future<String?> absen(String image)async{
+    try {
+      final res = await http.post(
+        Uri.parse("$baseUrl/detect"),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(
+            {'image': image}),
       );
       print("response register: ");
       print(res.body);

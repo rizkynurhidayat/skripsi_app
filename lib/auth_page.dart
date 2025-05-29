@@ -278,11 +278,10 @@ class _MyHomePageState extends State<MyHomePage> {
                                             builder: (context) => CameraCapture(
                                                   npm: _npmCOntroller.text,
                                                   username:
-                                                      _usernameController.text,
+                                                      namaController.text,
                                                 )),
                                       );
-                                      namaController.clear();
-                                      _npmCOntroller.clear();
+                                      
                                     } else {
                                       ScaffoldMessenger.of(context)
                                           .showSnackBar(
