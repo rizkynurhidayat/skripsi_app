@@ -1,9 +1,12 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:skripsi_app/api_service.dart';
 import 'package:skripsi_app/const.dart';
 import 'package:skripsi_app/dashboard_dsn.dart';
 import 'package:skripsi_app/dashboard_mhs.dart';
 
+import 'preview_image.dart';
 import 'register_mhs.dart';
 
 class MyHomePage extends StatefulWidget {
@@ -18,6 +21,10 @@ class _MyHomePageState extends State<MyHomePage> {
   final TextEditingController _npmCOntroller = TextEditingController();
   final namaController = TextEditingController();
   final ServiceKu api = ServiceKu();
+  bool isDataset = false;
+  String username = '';
+  String npm = '';
+  List<String> datasetList = [];
   @override
   void initState() {
     // TODO: implement initState
@@ -27,7 +34,21 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void init() async {
     final data = await api.getUsrData();
-    if (data['npm'] != null) {
+    final dataset = await api.getDataset();
+    final usr_temp = await api.getUsername();
+    final npm_temp = await api.getNpm();
+
+    if (dataset != null && usr_temp != null && npm_temp != null) {
+      datasetList = dataset.map((e) => e.toString()).toList();
+      print(dataset);
+      username = usr_temp;
+      npm = npm_temp;
+      if (datasetList.length != 0) {
+        isDataset = true;
+      }
+      setState(() {});
+    }
+    if (data != null && data['npm'] != null) {
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(
@@ -69,6 +90,7 @@ class _MyHomePageState extends State<MyHomePage> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: SingleChildScrollView(
+              physics: const NeverScrollableScrollPhysics(),
               child: Column(
                 children: [
                   const SizedBox(
@@ -188,7 +210,6 @@ class _MyHomePageState extends State<MyHomePage> {
                             }
                           });
                         }
-                        
                       },
                       text: "Masuk",
                       isLoginButton: true),
@@ -277,11 +298,9 @@ class _MyHomePageState extends State<MyHomePage> {
                                         MaterialPageRoute(
                                             builder: (context) => CameraCapture(
                                                   npm: _npmCOntroller.text,
-                                                  username:
-                                                      namaController.text,
+                                                  username: namaController.text,
                                                 )),
                                       );
-                                      
                                     } else {
                                       ScaffoldMessenger.of(context)
                                           .showSnackBar(
@@ -303,6 +322,32 @@ class _MyHomePageState extends State<MyHomePage> {
                       },
                       text: "Daftar",
                       isLoginButton: false),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  Builder(
+                    builder: (context) {
+                      if (isDataset) {
+                        return TextButton(
+                            style: TextButton.styleFrom(
+                                foregroundColor: Colors.white),
+                            onPressed: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => ImagePreview(
+                                          images: datasetList,
+                                          npm: npm,
+                                          username: username)));
+                            },
+                            child: const Text(
+                              "Lanjutkan kirim data wajah",
+                            ));
+                      } else {
+                        return SizedBox();
+                      }
+                    },
+                  )
                 ],
               ),
             ),

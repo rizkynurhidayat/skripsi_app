@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 // import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -32,8 +33,23 @@ class ServiceKu {
     return hasil;
   }
 
-  Future<Map<String, dynamic>> getUsrData() async {
+  Future<Map<String, dynamic>?> getUsrData() async {
     final data = await box.read('user');
+    return data;
+  }
+
+  Future<List<dynamic>?> getDataset() async {
+    final  data = await box.read('dataset');
+    return data;
+  }
+
+   Future<String?> getUsername() async {
+    final String? data = await box.read('username_temp');
+    return data;
+  }
+
+  Future<String?> getNpm() async {
+    final String? data = await box.read('npm_temp');
     return data;
   }
 

@@ -11,6 +11,7 @@ import 'package:skripsi_app/api_service.dart';
 import 'package:skripsi_app/auth_page.dart';
 
 import 'const.dart';
+import 'register_mhs.dart';
 // import 'package:skripsi_app/register_mhs.dart';
 
 class Dashboard_Mahasiswa extends StatefulWidget {
@@ -38,107 +39,129 @@ class _Dashboard_mahasiswaState extends State<Dashboard_Mahasiswa> {
         ),
       ),
       drawer: Drawer(
-        child: Expanded(
-          child: Stack(
-            children: [
-              SizedBox(
-                  width: MediaQuery.of(context).size.width,
-                  height: MediaQuery.of(context).size.height,
-                  child: Image.asset(
-                    "assets/bg_auth.png",
-                    fit: BoxFit.cover,
-                  )),
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(
-                      height: 30,
+          child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        decoration: const BoxDecoration(
+            image: DecorationImage(image: AssetImage("assets/bg_auth.png"),  fit: BoxFit.cover)),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(
+              height: 30,
+            ),
+            SizedBox(
+              // height: 370,
+              child: Column(
+                children: [
+                  Container(
+                    width: 160,
+                    height: 160,
+                    margin: const EdgeInsets.all(20),
+                    child: Image.asset(
+                      "assets/logo_ups.png",
+                      fit: BoxFit.contain,
                     ),
-                    SizedBox(
-                      height: 350,
-                      child: Column(
-                        children: [
-                          Container(
-                            width: 160,
-                            height: 160,
-                            margin: const EdgeInsets.all(20),
-                            child: Image.asset(
-                              "assets/logo_ups.png",
-                              fit: BoxFit.contain,
-                            ),
-                          ),
-                          const SizedBox(
-                            width: double.infinity,
-                            child: Text(
-                              "Selamat Datang!",
-                              style: TextStyle(
-                                  fontSize: 28,
-                                  fontWeight: FontWeight.w900,
-                                  color: darkblue),
-                              maxLines: 5,
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                          const SizedBox(
-                            height: 20,
-                          ),
-                          const SizedBox(
-                            // height: 400,
-                            width: double.infinity,
-                            child: Text(
-                              "Mahasiswa :",
-                              style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w400,
-                                  color: darkblue),
-                              maxLines: 5,
-                              textAlign: TextAlign.start,
-                            ),
-                          ),
-                          SizedBox(
-                            // height: 400,
-                            width: double.infinity,
-                            child: Text(
-                              "    ${widget.user['username']}\n   ${widget.user['npm']}",
-                              style: const TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w400,
-                                  color: darkblue),
-                              maxLines: 5,
-                              textAlign: TextAlign.start,
-                            ),
-                          ),
-                        ],
+                  ),
+                  const SizedBox(
+                    width: double.infinity,
+                    child: Text(
+                      "Selamat Datang!",
+                      style: TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.w900,
+                          color: darkblue),
+                      maxLines: 5,
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  const SizedBox(
+                    // height: 400,
+                    width: double.infinity,
+                    child: Text(
+                      "Mahasiswa :",
+                      style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w400,
+                          color: darkblue),
+                      maxLines: 5,
+                      textAlign: TextAlign.start,
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 20),
+                    child: SizedBox(
+                      // height: 400,
+                      width: double.infinity,
+                      child: Text(
+                        "${widget.user['username']}",
+                        style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w400,
+                            color: darkblue),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.start,
                       ),
                     ),
-                    Spacer(),
-                    ElevatedButton(
-                        style: const ButtonStyle(
-                            backgroundColor: WidgetStatePropertyAll(yellow),
-                            foregroundColor: WidgetStatePropertyAll(darkblue)),
-                        onPressed: () async {
-                          await _apiService.box.remove('user');
-                          Navigator.pushAndRemoveUntil(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const MyHomePage()),
-                            (Route<dynamic> route) => false,
-                          );
-                        },
-                        child: const Text("Keluar")),
-                    const SizedBox(
-                      height: 50,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 20),
+                    child: SizedBox(
+                      // height: 400,
+                      width: double.infinity,
+                      child: Text(
+                        "${widget.user['npm']}",
+                        style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w400,
+                            color: darkblue),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.start,
+                      ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            CommonButton(
+                onTap: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => CameraCapture(
+                                npm: widget.user['npm'],
+                                username: widget.user['username'],
+                              )));
+                },
+                text: "Perbarui Data Wajah",
+                isLoginButton: false),
+            Spacer(),
+            ElevatedButton(
+                style: const ButtonStyle(
+                    backgroundColor: WidgetStatePropertyAll(yellow),
+                    foregroundColor: WidgetStatePropertyAll(darkblue)),
+                onPressed: () async {
+                  await _apiService.box.remove('user');
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (context) => const MyHomePage()),
+                    (Route<dynamic> route) => false,
+                  );
+                },
+                child: const Text("Keluar")),
+            const SizedBox(
+              height: 50,
+            ),
+          ],
         ),
-      ),
+      )),
       body: SafeArea(
         child: Stack(
           children: [
@@ -157,6 +180,8 @@ class _Dashboard_mahasiswaState extends State<Dashboard_Mahasiswa> {
                         horizontal: 20, vertical: 10),
                     child: Text(
                       "Data Presensi ${widget.user['username']}",
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.bold,

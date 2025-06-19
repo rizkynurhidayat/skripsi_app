@@ -3,20 +3,25 @@ import 'dart:io';
 // import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:skripsi_app/api_service.dart';
 import 'package:image/image.dart' as img;
+import 'package:skripsi_app/auth_page.dart';
 
 import 'const.dart';
+import 'preview_image.dart';
 // import 'package:http/http.dart' as http;
 
 class CameraCapture extends StatefulWidget {
   const CameraCapture({
     required this.npm,
     required this.username,
+    // this.isUpdate,
     Key? key,
   }) : super(key: key);
   final String username;
   final String npm;
+  // final bool? isUpdate;
   @override
   State<CameraCapture> createState() => _CameraCaptureState();
 }
@@ -50,77 +55,71 @@ class _CameraCaptureState extends State<CameraCapture> {
     });
   }
 
-  Future<void> captureSingleImage() async {
-    setState(() {
-      isLoading = true;
-    });
+  // Future<void> captureSingleImage() async {
+  //   setState(() {
+  //     isLoading = true;
+  //   });
 
-    try {
-      final XFile file = await _controller.takePicture();
-      final img.Image capturedImage =
-          img.decodeImage(await file.readAsBytes())!;
-      final img.Image orientedImage =
-          img.flipHorizontal(img.bakeOrientation(capturedImage));
-      // Membalik gambar secara horizontal
-      // final img.Image flippedImage = img.flipHorizontal(orientedImage);
+  //   try {
+  //     final XFile file = await _controller.takePicture();
+  // final img.Image capturedImage =
+  //     img.decodeImage(await file.readAsBytes())!;
+  // final img.Image orientedImage =
+  //     img.flipHorizontal(img.bakeOrientation(capturedImage));
+  // // Membalik gambar secara horizontal
+  // final img.Image flippedImage = img.flipHorizontal(orientedImage);
 
-      final fixedFile = File(file.path)
-        ..writeAsBytesSync(img.encodeJpg(orientedImage));
-      final bytes = await fixedFile.readAsBytes();
-      final base64Image = base64Encode(bytes);
-      setState(() {
-        capturedImagePath = fixedFile.path;
-        isLoading = false;
-      });
-      // Navigator.push(
-      //     context,
-      //     MaterialPageRoute(
-      //         builder: (context) =>
-      //             ImagePreview(imagePath: capturedImagePath!)));
-      try {
-        final message = await apiService.absen(base64Image);
+  //     // final fixedFile = File(file.path)
+  //     //   ..writeAsBytesSync(img.encodeJpg(orientedImage));
+  //     // final bytes = await fixedFile.readAsBytes();
+  //     // final base64Image = base64Encode(bytes);
+  //     setState(() {
+  //       // capturedImagePath = fixedFile.path;
+  //       isLoading = false;
+  //     });
+  //     // Navigator.push(
+  //     //     context,
+  //     //     MaterialPageRoute(
+  //     //         builder: (context) =>
+  //     //             ImagePreview(imagePath: capturedImagePath!)));
+  //     // try {
+  //     //   final message = await apiService.absen(base64Image);
 
-        if (message != null) {
-          print("response: $message");
-        }
-      } catch (e) {
-        print("err: $e");
-        ;
-      }
-    } catch (e) {
-      setState(() {
-        isLoading = false;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error: ${e.toString()}'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
-  }
+  //     //   if (message != null) {
+  //     //     print("response: $message");
+  //     //   }
+  //     // } catch (e) {
+  //     //   print("err: $e");
+  //     //   ;
+  //     // }
+  //   } catch (e) {
+  //     setState(() {
+  //       isLoading = false;
+  //     });
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(
+  //         content: Text('Error: ${e.toString()}'),
+  //         backgroundColor: Colors.red,
+  //       ),
+  //     );
+  //   }
+  // }
 
-  Future<List<String>> captureImages(BuildContext context) async {
-    List<String> imageList = [];
+  Future<List<String>> captureImages(
+    BuildContext context,
+  ) async {
+    await Future.delayed(const Duration(seconds: 1));
+    List<String> fileList = [];
     final scaffoldMessenger = ScaffoldMessenger.of(context);
 
     for (int i = 0; i < 10; i++) {
       try {
         final XFile file = await _controller.takePicture();
-        final img.Image capturedImage =
-            img.decodeImage(await file.readAsBytes())!;
-        final img.Image orientedImage =
-            img.flipHorizontal(img.bakeOrientation(capturedImage));
-        final fixedFile = File(file.path)
-          ..writeAsBytesSync(img.encodeJpg(orientedImage));
-
-        final bytes = await fixedFile.readAsBytes();
-        final base64Image = base64Encode(bytes);
-        imageList.add(base64Image);
+        fileList.add(file.path);
         print("gambar ke-${i + 1} berhasil diambil");
 
         // Tunggu 1 detik sebelum ambil gambar berikutnya
-        await Future.delayed(const Duration(seconds: 1));
+        await Future.delayed(const Duration(milliseconds: 50));
       } catch (e) {
         scaffoldMessenger.showSnackBar(
           SnackBar(
@@ -133,59 +132,34 @@ class _CameraCaptureState extends State<CameraCapture> {
 
     scaffoldMessenger.showSnackBar(
       const SnackBar(
-        content: Text('Semua gambar berhasil diambil! 💖'),
-        backgroundColor: Colors.teal,
+        content: Text('Semua gambar berhasil diambil!'),
+        backgroundColor: Colors.green,
         duration: Duration(seconds: 2),
       ),
     );
+    await Future.delayed(
+      const Duration(seconds: 1),
+    );
 
-    return imageList;
-  }
-
-  Future<void> sendImagesToServer(List<String> imageList) async {
-    final scaffoldMessenger = ScaffoldMessenger.of(context);
-
-    try {
-      scaffoldMessenger.showSnackBar(
-        const SnackBar(
-          content: Text('Mengirim gambar.. '),
-          backgroundColor: Colors.blue,
-        ),
-      );
-
-      final message =
-          await apiService.register(imageList, widget.username, widget.npm);
-
-      if (message != null) {
-        scaffoldMessenger.showSnackBar(
-          SnackBar(
-            content: Text(message),
-            backgroundColor: Colors.green,
-            duration: const Duration(seconds: 2),
-          ),
-        );
-        Future.delayed(const Duration(seconds: 2), () {
-          Navigator.pop(context);
-        });
-      }
-    } catch (e) {
-      scaffoldMessenger.showSnackBar(
-        SnackBar(
-          content: Text('Error: ${e.toString()}'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => ImagePreview(
+                  images: fileList,
+                  npm: widget.npm,
+                  username: widget.username,
+                )));
+    return fileList;
   }
 
   Future<void> captureAndSendImages(BuildContext context) async {
     setState(() {
       isLoading = true;
     });
-
     try {
       final imageList = await captureImages(context);
-      await sendImagesToServer(imageList);
+
+      // await sendImagesToServer(imageList);
     } catch (e) {
       print('Error dalam proses: ${e.toString()}');
     } finally {
@@ -230,9 +204,13 @@ class _CameraCaptureState extends State<CameraCapture> {
                       ),
                       Container(
                         width: MediaQuery.of(context).size.width,
-                        height: 4.5 / 3 * MediaQuery.of(context).size.width ,
-                        // color: Colors.red,
-                        child: Image.asset('assets/cam_guided.png', fit: BoxFit.fill,),
+                        height: 4.5 / 3 * MediaQuery.of(context).size.width,
+                        // color: yellow,
+                        child: Image.asset(
+                          'assets/cam_guided3.png',
+                          fit: BoxFit.cover,
+                          // scale: 1.2,
+                        ),
                       ),
                     ],
                   ),
@@ -260,6 +238,10 @@ class _CameraCaptureState extends State<CameraCapture> {
                               isLoading = true;
                             });
                             captureAndSendImages(context);
+                            // captureImages(context);
+                            // setState(() {
+                            //   isLoading = false;
+                            // });
                             // captureSingleImage();
                           },
                           child: const Text("Ambil Gambar"),
@@ -275,16 +257,5 @@ class _CameraCaptureState extends State<CameraCapture> {
               color: Colors.white,
             )),
     );
-  }
-}
-
-class ImagePreview extends StatelessWidget {
-  final String imagePath;
-
-  const ImagePreview({required this.imagePath});
-
-  @override
-  Widget build(BuildContext context) {
-    return Image.file(File(imagePath), fit: BoxFit.contain);
   }
 }
