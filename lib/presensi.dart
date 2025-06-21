@@ -1,43 +1,30 @@
 import 'dart:convert';
 import 'dart:io';
-// import 'dart:io';
+
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
-import 'package:get_storage/get_storage.dart';
-import 'package:skripsi_app/api_service.dart';
 import 'package:image/image.dart' as img;
-import 'package:skripsi_app/auth_page.dart';
-
+import 'api_service.dart';
 import 'const.dart';
-import 'preview_image.dart';
-// import 'package:http/http.dart' as http;
 
-class CameraCapture extends StatefulWidget {
-  const CameraCapture({
-    required this.npm,
-    required this.username,
-    // this.isUpdate,
-    Key? key,
-  }) : super(key: key);
-  final String username;
-  final String npm;
-  // final bool? isUpdate;
+class PresensiPage extends StatefulWidget {
+  const PresensiPage({super.key});
+
   @override
-  State<CameraCapture> createState() => _CameraCaptureState();
+  State<PresensiPage> createState() => _PresensiPageState();
 }
 
-class _CameraCaptureState extends State<CameraCapture> {
+class _PresensiPageState extends State<PresensiPage> {
   final ServiceKu apiService = ServiceKu();
   late CameraController _controller;
   late List<CameraDescription> _cameras;
   bool isReady = false;
   bool isLoading = false;
-  String? capturedImagePath;
 
   @override
   void initState() {
     super.initState();
-    print("nama: ${widget.npm} | ${widget.username}");
+
     initCamera();
   }
 
@@ -55,76 +42,44 @@ class _CameraCaptureState extends State<CameraCapture> {
     });
   }
 
-  
-
-  Future<List<String>> captureImages(
-    BuildContext context,
-  ) async {
-    await Future.delayed(const Duration(seconds: 1));
-    List<String> fileList = [];
-    final scaffoldMessenger = ScaffoldMessenger.of(context);
-
-    for (int i = 0; i < 10; i++) {
-      try {
-        final XFile file = await _controller.takePicture();
-        fileList.add(file.path);
-        print("gambar ke-${i + 1} berhasil diambil");
-
-        // Tunggu 1 detik sebelum ambil gambar berikutnya
-        await Future.delayed(const Duration(milliseconds: 50));
-      } catch (e) {
-        scaffoldMessenger.showSnackBar(
-          SnackBar(
-            content: Text('Error gambar ${i + 1}: ${e.toString()}'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
-
-    scaffoldMessenger.showSnackBar(
-      const SnackBar(
-        content: Text('Semua gambar berhasil diambil!'),
-        backgroundColor: Colors.green,
-        duration: Duration(seconds: 2),
-      ),
-    );
-    await Future.delayed(
-      const Duration(seconds: 1),
-    );
-
-    Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => ImagePreview(
-                  images: fileList,
-                  npm: widget.npm,
-                  username: widget.username,
-                )));
-    return fileList;
-  }
-
-  Future<void> captureAndSendImages(BuildContext context) async {
-    setState(() {
-      isLoading = true;
-    });
+  Future<void> captureSingleImage() async {
     try {
-      final imageList = await captureImages(context);
+      final XFile file = await _controller.takePicture();
+      final img.Image capturedImage =
+          img.decodeImage(await file.readAsBytes())!;
+      final img.Image orientedImage =
+          img.flipHorizontal(img.bakeOrientation(capturedImage));
+      // Membalik gambar secara horizontal
+      // final img.Image flippedImage = img.flipHorizontal(orientedImage);
 
-      // await sendImagesToServer(imageList);
+      final fixedFile = File(file.path)
+        ..writeAsBytesSync(img.encodeJpg(orientedImage));
+      final bytes = await fixedFile.readAsBytes();
+      final base64Image = base64Encode(bytes);
+
+      // Navigator.push(
+      //     context,
+      //     MaterialPageRoute(
+      //         builder: (context) =>
+      //             ImagePreview(imagePath: capturedImagePath!)));
+      try {
+        final message = await apiService.absen(base64Image);
+
+        if (message != null) {
+          print("response: $message");
+        }
+      } catch (e) {
+        print("err: $e");
+        ;
+      }
     } catch (e) {
-      print('Error dalam proses: ${e.toString()}');
-    } finally {
-      setState(() {
-        isLoading = false;
-      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
   }
 
   @override
@@ -186,15 +141,15 @@ class _CameraCaptureState extends State<CameraCapture> {
                                 WidgetStatePropertyAll(Colors.white),
                           ),
                           onPressed: () {
-                            setState(() {
-                              isLoading = true;
-                            });
-                            captureAndSendImages(context);
+                            // setState(() {
+                            //   isLoading = true;
+                            // });
+                            // captureAndSendImages(context);
                             // captureImages(context);
                             // setState(() {
                             //   isLoading = false;
                             // });
-                            // captureSingleImage();
+                            captureSingleImage();
                           },
                           child: const Text("Ambil Gambar"),
                         );

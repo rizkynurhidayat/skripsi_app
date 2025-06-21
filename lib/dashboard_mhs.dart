@@ -23,10 +23,12 @@ class Dashboard_Mahasiswa extends StatefulWidget {
 
 class _Dashboard_mahasiswaState extends State<Dashboard_Mahasiswa> {
   final ServiceKu _apiService = ServiceKu();
+  final TextEditingController searchController = TextEditingController();
+  String searchText = '';
 
   String formatTimestamp(Timestamp timestamp) {
     DateTime dateTime = timestamp.toDate();
-    return DateFormat('MM/dd/yyyy, hh:mm a').format(dateTime);
+    return DateFormat('EEEE, dd/MM/yyyy, HH:mm', 'id_ID').format(dateTime);
   }
 
   @override
@@ -42,7 +44,8 @@ class _Dashboard_mahasiswaState extends State<Dashboard_Mahasiswa> {
           child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         decoration: const BoxDecoration(
-            image: DecorationImage(image: AssetImage("assets/bg_auth.png"),  fit: BoxFit.cover)),
+            image: DecorationImage(
+                image: AssetImage("assets/bg_auth.png"), fit: BoxFit.cover)),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -168,9 +171,12 @@ class _Dashboard_mahasiswaState extends State<Dashboard_Mahasiswa> {
             SizedBox(
                 width: MediaQuery.of(context).size.width,
                 height: MediaQuery.of(context).size.height,
-                child: Image.asset(
-                  "assets/bg_dashboard.png",
-                  fit: BoxFit.cover,
+                child: SingleChildScrollView(
+                  physics: const NeverScrollableScrollPhysics(),
+                  child: Image.asset(
+                    "assets/bg_dashboard.png",
+                    fit: BoxFit.cover,
+                  ),
                 )),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -187,6 +193,27 @@ class _Dashboard_mahasiswaState extends State<Dashboard_Mahasiswa> {
                           fontWeight: FontWeight.bold,
                           color: darkblue),
                     )),
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+                  child: TextField(
+                    controller: searchController,
+                    decoration: InputDecoration(
+                      hintText: 'Cari matkul atau ruangan...',
+                      prefixIcon: const Icon(Icons.search),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      filled: true,
+                      fillColor: Colors.white,
+                    ),
+                    onChanged: (value) {
+                      setState(() {
+                        searchText = value.toLowerCase();
+                      });
+                    },
+                  ),
+                ),
                 Expanded(
                   child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
                     stream: _apiService.firestore
@@ -201,11 +228,43 @@ class _Dashboard_mahasiswaState extends State<Dashboard_Mahasiswa> {
                             child: Text("no data"),
                           );
                         }
-                        final data = raw.docs
+                        var dataByNpm = raw.docs
                             .where(
                               (element) => element['npm'] == widget.user['npm'],
                             )
                             .toList();
+
+                        final data = dataByNpm.where((doc) {
+                          if (searchText.isEmpty) {
+                            return true;
+                          }
+                          final matkulData =
+                              doc.data()['matkul'] as Map<String, dynamic>?;
+                          if (matkulData == null) {
+                            return false;
+                          }
+                          final namaMatkul = (matkulData['nama_matkul'] ?? '')
+                              .toString()
+                              .toLowerCase();
+                          final ruangan = (matkulData['ruangan'] ?? '')
+                              .toString()
+                              .toLowerCase();
+
+                          return namaMatkul.contains(searchText) ||
+                              ruangan.contains(searchText);
+                        }).toList();
+
+                        if (data.isEmpty) {
+                          return const Center(
+                            child: Text(
+                              'Data tidak ditemukan.',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                          );
+                        }
 
                         return SingleChildScrollView(
                           child: Column(
@@ -215,10 +274,8 @@ class _Dashboard_mahasiswaState extends State<Dashboard_Mahasiswa> {
                                 final absen = data[index].data();
                                 Uint8List bytes =
                                     base64Decode(absen['photo_base64']);
-                                // var date = DateTime.fromMillisecondsSinceEpoch(absen['createdAt'] * 1000);
 
                                 return Container(
-                                  // width: double.infinity,
                                   padding: const EdgeInsets.all(10),
                                   margin: const EdgeInsets.symmetric(
                                       horizontal: 20, vertical: 10),
@@ -230,19 +287,27 @@ class _Dashboard_mahasiswaState extends State<Dashboard_Mahasiswa> {
                                       Image.memory(
                                         bytes,
                                         fit: BoxFit.contain,
-                                        // width: double.infinity,
                                         height: 250,
                                       ),
                                       ListTile(
                                         title: Text(
                                           absen['username'],
-                                          style:
-                                              const TextStyle(color: darkblue),
+                                          style: const TextStyle(
+                                              color: darkblue,
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 20),
                                         ),
                                         subtitle: Text(
                                             formatTimestamp(absen['createdAt']),
                                             style: const TextStyle(
                                                 color: darkblue)),
+                                        trailing: Text(
+                                          absen['matkul']?['nama_matkul'] ?? '',
+                                          style: const TextStyle(
+                                              color: darkblue,
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 25),
+                                        ),
                                       ),
                                     ],
                                   ),
@@ -269,5 +334,11 @@ class _Dashboard_mahasiswaState extends State<Dashboard_Mahasiswa> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    searchController.dispose();
+    super.dispose();
   }
 }

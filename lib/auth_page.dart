@@ -1,4 +1,4 @@
-import 'dart:io';
+// import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:skripsi_app/api_service.dart';
@@ -6,6 +6,7 @@ import 'package:skripsi_app/const.dart';
 import 'package:skripsi_app/dashboard_dsn.dart';
 import 'package:skripsi_app/dashboard_mhs.dart';
 
+import 'presensi.dart';
 import 'preview_image.dart';
 import 'register_mhs.dart';
 
@@ -325,6 +326,18 @@ class _MyHomePageState extends State<MyHomePage> {
                   const SizedBox(
                     height: 10,
                   ),
+                  // TextButton(
+                  //           style: TextButton.styleFrom(
+                  //               foregroundColor: Colors.white),
+                  //           onPressed: () {
+                  //             Navigator.push(
+                  //                 context,
+                  //                 MaterialPageRoute(
+                  //                     builder: (context) => const PresensiPage()));
+                  //           },
+                  //           child: const Text(
+                  //             "presensi",
+                  //           )),
                   Builder(
                     builder: (context) {
                       if (isDataset) {

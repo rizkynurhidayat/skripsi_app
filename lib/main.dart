@@ -2,6 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/date_symbol_data_local.dart'; 
 import 'package:skripsi_app/auth_page.dart';
 import 'const.dart';
 import 'firebase_options.dart';
@@ -12,6 +13,7 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   await GetStorage.init();
+  await initializeDateFormatting('id_ID', null);
   runApp(const MyApp());
 }
 

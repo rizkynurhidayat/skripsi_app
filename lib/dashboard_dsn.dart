@@ -3,11 +3,13 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
+import 'package:skripsi_app/exportedPDF.dart';
 import 'dart:convert';
 
 import 'api_service.dart';
 import 'auth_page.dart';
 import 'const.dart';
+import 'datapresensi_dosen.dart';
 
 class Dashboard_Dosen extends StatefulWidget {
   const Dashboard_Dosen({super.key});
@@ -322,13 +324,10 @@ class _Dashboard_DosenState extends State<Dashboard_Dosen> {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
-    final height = MediaQuery.of(context).size.height;
-
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'Dashboard',
+          'Daftar Mata Kuliah',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
       ),
@@ -390,15 +389,25 @@ class _Dashboard_DosenState extends State<Dashboard_Dosen> {
                   ],
                 ),
               ),
-              // CommonButton(
-              //   onTap: () {
-              //     // Navigator.push(
-              //     //     context,
-              //     //     MaterialPageRoute(
-              //     //         builder: (context) => ));
-              //   },
-              //   text: "daftar matkul",
-              //   isLoginButton: false),
+              CommonButton(
+                onTap: () {
+                  showTambahMatkulDialog();
+                },
+                text: "Tambah Matkul",
+                isLoginButton: false,
+              ),
+              const SizedBox(height: 15,),
+              CommonButton(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const ExportedPdfPage()),
+                  );
+                },
+                text: "Lihat PDF Tersimpan",
+                isLoginButton: false,
+              ),
               Spacer(),
               ElevatedButton(
                   style: const ButtonStyle(
@@ -425,40 +434,22 @@ class _Dashboard_DosenState extends State<Dashboard_Dosen> {
         child: Stack(
           alignment: Alignment.center,
           children: [
-            Expanded(
-              child: SingleChildScrollView(
+              SizedBox(
+                width: MediaQuery.of(context).size.width,
+                height: MediaQuery.of(context).size.height,
+                child: SingleChildScrollView(
                   physics: const NeverScrollableScrollPhysics(),
                   child: Image.asset(
                     "assets/bg_dashboard.png",
                     fit: BoxFit.cover,
-                  )),
-            ),
+                  ),
+                )),
             Padding(
               padding: const EdgeInsets.symmetric(
                 horizontal: 20,
               ),
               child: buildListMatkul(),
             ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton.large(
-        onPressed: () {
-          showTambahMatkulDialog();
-        },
-        foregroundColor: darkblue,
-        backgroundColor: yellow,
-        child: const Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.add,
-              size: 24.0,
-            ),
-            Text(
-              "Tambah Matkul",
-              textAlign: TextAlign.center,
-            )
           ],
         ),
       ),
@@ -513,10 +504,13 @@ class _Dashboard_DosenState extends State<Dashboard_Dosen> {
               }
               if (snapshot.hasError) {
                 return const Center(
-                    child: Text('Terjadi kesalahan, coba lagi.',  style: TextStyle(color: Colors.white)));
+                    child: Text('Terjadi kesalahan, coba lagi.',
+                        style: TextStyle(color: Colors.white)));
               }
               if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                return const Center(child: Text('Belum ada data mata kuliah.',  style: TextStyle(color: Colors.white)));
+                return const Center(
+                    child: Text('Belum ada data mata kuliah.',
+                        style: TextStyle(color: Colors.white)));
               }
               final docs = snapshot.data!.docs;
 
@@ -548,6 +542,16 @@ class _Dashboard_DosenState extends State<Dashboard_Dosen> {
                     margin:
                         const EdgeInsets.symmetric(vertical: 4, horizontal: 0),
                     child: ListTile(
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => PresensiMhsPage(
+                                      idMatkul: docId,
+                                      namaMk:
+                                          "${matkul["nama_matkul"]}",
+                                    )));
+                      },
                       title: Text(
                         matkul['nama_matkul'] ?? '-',
                         style: const TextStyle(fontSize: 22),
