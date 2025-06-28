@@ -47,7 +47,7 @@ class _CameraCaptureState extends State<CameraCapture> {
       (cam) => cam.lensDirection == CameraLensDirection.front,
     );
 
-    _controller = CameraController(frontCamera, ResolutionPreset.low,
+    _controller = CameraController(frontCamera, ResolutionPreset.medium,
         imageFormatGroup: ImageFormatGroup.jpeg);
     await _controller.initialize();
     setState(() {
