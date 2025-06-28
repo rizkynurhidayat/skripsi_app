@@ -12,6 +12,7 @@ import 'package:skripsi_app/auth_page.dart';
 
 import 'const.dart';
 import 'register_mhs.dart';
+import 'tambahpresensi.dart';
 // import 'package:skripsi_app/register_mhs.dart';
 
 class Dashboard_Mahasiswa extends StatefulWidget {
@@ -145,6 +146,20 @@ class _Dashboard_mahasiswaState extends State<Dashboard_Mahasiswa> {
                 },
                 text: "Perbarui Data Wajah",
                 isLoginButton: false),
+            const SizedBox(
+              height: 20,
+            ),
+            CommonButton(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const InputPresensiPage()),
+                );
+              },
+              text: "Input presensi manual",
+              isLoginButton: false,
+            ),
             Spacer(),
             ElevatedButton(
                 style: const ButtonStyle(
@@ -290,25 +305,46 @@ class _Dashboard_mahasiswaState extends State<Dashboard_Mahasiswa> {
                                         height: 250,
                                       ),
                                       ListTile(
-                                        title: Text(
-                                          absen['username'],
-                                          style: const TextStyle(
-                                              color: darkblue,
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 20),
-                                        ),
-                                        subtitle: Text(
-                                            formatTimestamp(absen['createdAt']),
+                                          title: Text(
+                                            absen['username'],
                                             style: const TextStyle(
-                                                color: darkblue)),
-                                        trailing: Text(
-                                          absen['matkul']?['nama_matkul'] ?? '',
-                                          style: const TextStyle(
-                                              color: darkblue,
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 25),
-                                        ),
-                                      ),
+                                                color: darkblue,
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 20),
+                                          ),
+                                          subtitle: Text(
+                                              formatTimestamp(
+                                                  absen['createdAt']),
+                                              style: const TextStyle(
+                                                  color: darkblue)),
+                                          trailing: Column(
+                                            children: [
+                                              Text(
+                                                absen['matkul']
+                                                        ?['nama_matkul'] ??
+                                                    '',
+                                                style: const TextStyle(
+                                                    color: darkblue,
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 20),
+                                              ),
+                                              Text(
+                                                absen['keterangan'] ?? '',
+                                                textAlign: TextAlign.center,
+                                                style: TextStyle(
+                                                    color: ((absen[
+                                                                'keterangan'] ==
+                                                            'Sakit'))
+                                                        ? Colors.red
+                                                        : ((absen['keterangan'] ==
+                                                                'Izin'))
+                                                            ? Colors.amber
+                                                            : darkblue,
+                                                            fontWeight: FontWeight.bold,
+                                                    fontSize: 16),
+                                              ),
+                                            ],
+                                          )),
                                     ],
                                   ),
                                 );
