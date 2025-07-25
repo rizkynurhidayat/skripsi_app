@@ -34,7 +34,7 @@ class _PresensiPageState extends State<PresensiPage> {
       (cam) => cam.lensDirection == CameraLensDirection.front,
     );
 
-    _controller = CameraController(frontCamera, ResolutionPreset.max,
+    _controller = CameraController(frontCamera, ResolutionPreset.high,
         imageFormatGroup: ImageFormatGroup.jpeg);
     await _controller.initialize();
     setState(() {
@@ -67,6 +67,12 @@ class _PresensiPageState extends State<PresensiPage> {
 
         if (message != null) {
           print("response: $message");
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('berhasil: $message'),
+              backgroundColor: Colors.green,
+            ),
+          );
         }
       } catch (e) {
         print("err: $e");

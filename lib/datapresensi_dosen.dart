@@ -134,15 +134,16 @@ class _PresensiMhsPageState extends State<PresensiMhsPage> {
             ),
             // ====== END DETAIL LAPORAN ======
 
-            // ====== TABEL DATA PRESENSI DENGAN FOTO ======
+            // ====== TABEL DATA PRESENSI DENGAN FOTO DAN KETERANGAN ======
             pw.Table(
               border: pw.TableBorder.all(),
               // Atur lebar kolom agar sesuai
               columnWidths: {
-                0: const pw.FixedColumnWidth(30), // No
-                1: const pw.FlexColumnWidth(1.5), // Nama
-                2: const pw.FlexColumnWidth(2), // Waktu Presensi
-                3: const pw.FixedColumnWidth(60), // Foto
+                0: const pw.FixedColumnWidth(25),   // No
+                1: const pw.FlexColumnWidth(1.2),   // Nama
+                2: const pw.FlexColumnWidth(1.5),   // Waktu Presensi
+                3: const pw.FixedColumnWidth(50),   // Keterangan
+                4: const pw.FixedColumnWidth(50),   // Foto
               },
               children: [
                 // Header Tabel
@@ -166,6 +167,11 @@ class _PresensiMhsPageState extends State<PresensiMhsPage> {
                                 pw.TextStyle(fontWeight: pw.FontWeight.bold))),
                     pw.Padding(
                         padding: const pw.EdgeInsets.all(4),
+                        child: pw.Text('Keterangan',
+                            style:
+                                pw.TextStyle(fontWeight: pw.FontWeight.bold))),
+                    pw.Padding(
+                        padding: const pw.EdgeInsets.all(4),
                         child: pw.Text('Foto',
                             style:
                                 pw.TextStyle(fontWeight: pw.FontWeight.bold))),
@@ -177,6 +183,7 @@ class _PresensiMhsPageState extends State<PresensiMhsPage> {
                   final absen = data[index].data();
                   final tanggal = formatTimestamp(absen['createdAt']);
                   final nama = absen['username'] ?? '';
+                  final keterangan = absen['keterangan'] ?? '-';
                   final photoBase64 = absen['photo_base64'] ?? '';
                   pw.Widget fotoWidget;
 
@@ -185,8 +192,8 @@ class _PresensiMhsPageState extends State<PresensiMhsPage> {
                     final photoBytes = base64Decode(photoBase64);
                     fotoWidget = pw.Image(
                       pw.MemoryImage(photoBytes),
-                      width: 50,
-                      height: 50,
+                      width: 40,
+                      height: 40,
                       fit: pw.BoxFit.cover,
                     );
                   } catch (e) {
@@ -207,10 +214,13 @@ class _PresensiMhsPageState extends State<PresensiMhsPage> {
                       pw.Padding(
                           padding: const pw.EdgeInsets.all(4),
                           child: pw.Text(tanggal)),
+                      pw.Padding(
+                          padding: const pw.EdgeInsets.all(4),
+                          child: pw.Text(keterangan, textAlign: pw.TextAlign.center)),
                       pw.Container(
                         margin: const pw.EdgeInsets.all(2),
                         alignment: pw.Alignment.center,
-                        height: 50,
+                        height: 40,
                         child: fotoWidget,
                       ),
                     ],
@@ -479,11 +489,34 @@ class _PresensiMhsPageState extends State<PresensiMhsPage> {
                                         formatTimestamp(absen['createdAt']),
                                         style:
                                             const TextStyle(color: darkblue)),
-                                    trailing: Text(
-                                      absen['matkul']['nama_matkul'],
-                                      style: const TextStyle(
-                                          color: darkblue, fontSize: 25),
-                                    ),
+                                    trailing: Column(
+                                            children: [
+                                              Text(
+                                                absen['matkul']
+                                                        ?['nama_matkul'] ??
+                                                    '',
+                                                style: const TextStyle(
+                                                    color: darkblue,
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 20),
+                                              ),
+                                              Text(
+                                                absen['keterangan'] ?? '',
+                                                textAlign: TextAlign.center,
+                                                style: TextStyle(
+                                                    color: ((absen[
+                                                                'keterangan'] ==
+                                                            'Sakit'))
+                                                        ? Colors.red
+                                                        : ((absen['keterangan'] ==
+                                                                'Izin'))
+                                                            ? Colors.amber
+                                                            : darkblue,
+                                                            fontWeight: FontWeight.bold,
+                                                    fontSize: 16),
+                                              ),
+                                            ],
+                                          )
                                   ),
                                 ],
                               ),

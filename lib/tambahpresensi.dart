@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:image/image.dart' as img; // tambahkan import ini
 
 import 'api_service.dart';
 import 'const.dart';
@@ -37,9 +38,23 @@ class _InputPresensiPageState extends State<InputPresensiPage> {
         imageFile = File(picked.path);
       });
       final bytes = await picked.readAsBytes();
-      setState(() {
-        photoBase64 = base64Encode(bytes);
-      });
+
+      // Resize gambar sebelum encode base64
+      img.Image? original = img.decodeImage(bytes);
+      if (original != null) {
+        // Resize ke 200x200 px (atau ubah sesuai kebutuhan)
+        img.Image resized = img.copyResize(original, width: 600, height: 600);
+        final resizedBytes =
+            img.encodeJpg(resized, quality: 60); // bisa atur quality juga
+        setState(() {
+          photoBase64 = base64Encode(resizedBytes);
+        });
+      } else {
+        // fallback jika gagal decode
+        setState(() {
+          photoBase64 = base64Encode(bytes);
+        });
+      }
     }
   }
 
@@ -54,24 +69,29 @@ class _InputPresensiPageState extends State<InputPresensiPage> {
     }
     setState(() => isLoading = true);
     try {
-      await FirebaseFirestore.instance.collection('attendance').add({
+      // Siapkan data yang akan dikirim
+      final dataToSend = {
         'username': user?['username'],
         'npm': user?['npm'],
         'keterangan': keterangan,
-        'photo_base64': photoBase64,
-        'createdAt': Timestamp.now(),
         'id_matkul': selectedMatkul!['id'],
-        'matkul': {
-          'nama_matkul': selectedMatkul!['nama_matkul'],
-          'ruangan': selectedMatkul!['ruangan'],
-          'dosen': selectedMatkul!['dosen'],
-          'startTime': selectedMatkul!['startTime'],
-          'finishTime': selectedMatkul!['finishTime'],
-        }
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Presensi berhasil disimpan!')),
-      );
+        // 'photo_base64': photoBase64,
+      };
+      print('[DEBUG] Data yang dikirim ke API manualPresensi:');
+      print(dataToSend);
+      Map<String, dynamic>? res = await _api.manualPresensi(photoBase64!,
+          user?['username'], user?['npm'], keterangan!, selectedMatkul!['id']);
+
+      if (res!['status'] == 'success') {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Presensi berhasil disimpan!'), backgroundColor: Colors.green,),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text('Presensi gagal disimpan!: ${res['message']}'), backgroundColor: Colors.red,),
+        );
+      }
       setState(() {
         imageFile = null;
         photoBase64 = null;
@@ -80,11 +100,11 @@ class _InputPresensiPageState extends State<InputPresensiPage> {
       });
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Gagal menyimpan: $e')),
+        SnackBar(content: Text('Gagal menyimpan: $e'),  backgroundColor: Colors.red),
       );
     }
     setState(() => isLoading = false);
-  Navigator.pop(context);
+    // Navigator.pop(context);
   }
 
   void init() async {
@@ -180,8 +200,8 @@ class _InputPresensiPageState extends State<InputPresensiPage> {
                                 value: 'Izin', child: Text('Izin')),
                             DropdownMenuItem(
                                 value: 'Sakit', child: Text('Sakit')),
-                            DropdownMenuItem(
-                                value: 'Lainnya', child: Text('Lainnya')),
+                            // DropdownMenuItem(
+                            //     value: 'Lainnya', child: Text('Lainnya')),
                           ],
                           onChanged: (value) {
                             setState(() {

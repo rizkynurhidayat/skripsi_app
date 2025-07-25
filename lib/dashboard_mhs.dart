@@ -134,21 +134,21 @@ class _Dashboard_mahasiswaState extends State<Dashboard_Mahasiswa> {
             const SizedBox(
               height: 20,
             ),
-            CommonButton(
-                onTap: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => CameraCapture(
-                                npm: widget.user['npm'],
-                                username: widget.user['username'],
-                              )));
-                },
-                text: "Perbarui Data Wajah",
-                isLoginButton: false),
-            const SizedBox(
-              height: 20,
-            ),
+            // CommonButton(
+            //     onTap: () {
+            //       Navigator.push(
+            //           context,
+            //           MaterialPageRoute(
+            //               builder: (context) => CameraCapture(
+            //                     npm: widget.user['npm'],
+            //                     username: widget.user['username'],
+            //                   )));
+            //     },
+            //     text: "Perbarui Data Wajah",
+            //     isLoginButton: false),
+            // const SizedBox(
+            //   height: 20,
+            // ),
             CommonButton(
               onTap: () {
                 Navigator.push(

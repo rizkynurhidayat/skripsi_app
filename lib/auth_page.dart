@@ -6,9 +6,10 @@ import 'package:skripsi_app/const.dart';
 import 'package:skripsi_app/dashboard_dsn.dart';
 import 'package:skripsi_app/dashboard_mhs.dart';
 
+// import 'presensi.dart';
 import 'presensi.dart';
 import 'preview_image.dart';
-import 'register_mhs.dart';
+// import 'register_mhs.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key});
@@ -180,6 +181,12 @@ class _MyHomePageState extends State<MyHomePage> {
                                 builder: (context) => const Dashboard_Dosen()),
                             (Route<dynamic> route) => false,
                           );
+                        } else if (_usernameController.text == "presensi") {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const PresensiPage()),
+                          );
                         } else {
                           final api = ServiceKu();
                           api.authMhs(_usernameController.text).then((value) {
@@ -215,17 +222,104 @@ class _MyHomePageState extends State<MyHomePage> {
                       text: "Masuk",
                       isLoginButton: true),
                   const SizedBox(
-                    height: 30,
-                    child: Center(
-                      child: Text(
-                        "Atau",
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    ),
+                    height: 10,
                   ),
-                  CommonButton(
+                  Builder(
+                    builder: (context) {
+                      if (isDataset) {
+                        return TextButton(
+                            style: TextButton.styleFrom(
+                                foregroundColor: Colors.white),
+                            onPressed: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => ImagePreview(
+                                          images: datasetList,
+                                          npm: npm,
+                                          username: username)));
+                            },
+                            child: const Text(
+                              "Lanjutkan kirim data wajah",
+                            ));
+                      } else {
+                        return SizedBox();
+                      }
+                    },
+                  )
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/*
+  CommonButton(
                       onTap: () {
                         showDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (BuildContext context) {
+                            final TextEditingController ipController =
+                                TextEditingController();
+                            return AlertDialog(
+                              title: const Text(
+                                'Isi Alamat IP ESP',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              backgroundColor: yellow,
+                              content: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 30, vertical: 15),
+                                    margin:
+                                        const EdgeInsets.symmetric(vertical: 6),
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(200),
+                                      color: Colors.white,
+                                    ),
+                                    child: TextField(
+                                      controller: ipController,
+                                      keyboardType: TextInputType.number,
+                                      decoration:
+                                          const InputDecoration.collapsed(
+                                        hintText:
+                                            "Alamat IP (misal: 192.168.1.10)",
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: const Text('Batal'),
+                                ),
+                                ElevatedButton(
+                                  style: const ButtonStyle(
+                                    backgroundColor:
+                                        WidgetStatePropertyAll(darkblue),
+                                    foregroundColor:
+                                        WidgetStatePropertyAll(Colors.white),
+                                  ),
+                                  onPressed: () async {
+                                    String ip = ipController.text.trim();
+                                    final ipRegex = RegExp(
+                                        r'^(?:[0-9]{1,3}\.){3}[0-9]{1,3}
+*/
+
+//dialog daftar lama
+/*
+showDialog(
                           context: context,
                           barrierDismissible: false,
                           builder: (BuildContext context) {
@@ -320,53 +414,5 @@ class _MyHomePageState extends State<MyHomePage> {
                             );
                           },
                         );
-                      },
-                      text: "Daftar",
-                      isLoginButton: false),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  // TextButton(
-                  //           style: TextButton.styleFrom(
-                  //               foregroundColor: Colors.white),
-                  //           onPressed: () {
-                  //             Navigator.push(
-                  //                 context,
-                  //                 MaterialPageRoute(
-                  //                     builder: (context) => const PresensiPage()));
-                  //           },
-                  //           child: const Text(
-                  //             "presensi",
-                  //           )),
-                  Builder(
-                    builder: (context) {
-                      if (isDataset) {
-                        return TextButton(
-                            style: TextButton.styleFrom(
-                                foregroundColor: Colors.white),
-                            onPressed: () {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => ImagePreview(
-                                          images: datasetList,
-                                          npm: npm,
-                                          username: username)));
-                            },
-                            child: const Text(
-                              "Lanjutkan kirim data wajah",
-                            ));
-                      } else {
-                        return SizedBox();
-                      }
-                    },
-                  )
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
+*/
+//end dialog

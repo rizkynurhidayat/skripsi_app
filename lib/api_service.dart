@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'dart:io';
+// import 'dart:io';
 // import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -11,9 +11,9 @@ class ServiceKu {
   // static String baseUrl = "http://172.20.10.2:5000/api/register";
   // static String baseUrl = "http://192.168.1.104:5000/api/register";
   // static String baseUrl = "https://3000-firebase-cobaapi-1748147920733.cluster-pgviq6mvsncnqxx6kr7pbz65v6.cloudworkstations.dev/api/register";
-  static String baseUrl = "https://3000-firebase-cobaapi-1748147920733.cluster-pgviq6mvsncnqxx6kr7pbz65v6.cloudworkstations.dev/api";
+  static String baseUrl = "http://202.155.132.124:5000/api";
   // static String baseUrl = "https://3000-firebase-cobaapi-1748147920733.cluster-pgviq6mvsncnqxx6kr7pbz65v6.cloudworkstations.dev/";
- 
+
   FirebaseFirestore firestore = FirebaseFirestore.instance;
   final box = GetStorage();
 
@@ -39,11 +39,11 @@ class ServiceKu {
   }
 
   Future<List<dynamic>?> getDataset() async {
-    final  data = await box.read('dataset');
+    final data = await box.read('dataset');
     return data;
   }
 
-   Future<String?> getUsername() async {
+  Future<String?> getUsername() async {
     final String? data = await box.read('username_temp');
     return data;
   }
@@ -71,13 +71,35 @@ class ServiceKu {
     }
   }
 
-  Future<String?> absen(String image)async{
+  Future<Map<String, dynamic>?> manualPresensi(String base64Image,
+      String username, String npm, String keterangan, String idMatkul) async {
+    try {
+      final res = await http.post(
+        Uri.parse("$baseUrl/manual-attendance"),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'npm': npm,
+          'username': username,
+          'photo_base64': base64Image,
+          "id_matkul": idMatkul,
+          "keterangan": keterangan
+        }),
+      );
+      print("response Manual presensi: ");
+      print(res.body);
+      final json = jsonDecode(res.body);
+      return json;
+    } catch (e) {
+      print("err: $e");
+    }
+  }
+
+  Future<String?> absen(String image) async {
     try {
       final res = await http.post(
         Uri.parse("$baseUrl/detect"),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode(
-            {'image': image}),
+        body: jsonEncode({'image': image}),
       );
       print("response register: ");
       print(res.body);

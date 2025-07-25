@@ -1,12 +1,12 @@
-import 'dart:convert';
-import 'dart:io';
+// import 'dart:convert';
+// import 'dart:io';
 // import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
-import 'package:get_storage/get_storage.dart';
+// import 'package:get_storage/get_storage.dart';
 import 'package:skripsi_app/api_service.dart';
-import 'package:image/image.dart' as img;
-import 'package:skripsi_app/auth_page.dart';
+// import 'package:image/image.dart' as img;
+// import 'package:skripsi_app/auth_page.dart';
 
 import 'const.dart';
 import 'preview_image.dart';
@@ -47,7 +47,7 @@ class _CameraCaptureState extends State<CameraCapture> {
       (cam) => cam.lensDirection == CameraLensDirection.front,
     );
 
-    _controller = CameraController(frontCamera, ResolutionPreset.medium,
+    _controller = CameraController(frontCamera, ResolutionPreset.high,
         imageFormatGroup: ImageFormatGroup.jpeg);
     await _controller.initialize();
     setState(() {
